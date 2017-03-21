@@ -3,9 +3,12 @@
   */
 sealed trait Stream[+A] {
 
-  def toList:List[A]=this match {
-      case Empty=>Nil
-      case Cons(h,t)=>h()::t().toList
+  def toList:List[A]= {
+    println("print")
+    this match {
+      case Empty => Nil
+      case Cons(h, t) => h() :: t().toList
+    }
   }
   def take(n:Int):Stream[A]=this match {
       case Cons(h, t) if n>0 => Stream.cons(h(), t().take(n - 1))
@@ -17,9 +20,20 @@ sealed trait Stream[+A] {
     case _=>this
   }
 
-  def foldRight[B](z: =>B)(f: ( A, =>B)=>B):B=this match {
-    case Cons(h,t)=>f(h(),t().foldRight(z)(f))
-    case _=>z
+  def foldRight[B](z: =>B)(f: ( A, =>B)=>B):B= {
+   println("call fold")
+    this match {
+      case Cons(h, t) => f(h(), t().foldRight(z)(f))
+      case _ => z
+    }
+  }
+
+  def foldRight2[B](z: =>B)(f: ( A, =>B)=>B):B= {
+    println("call fold2")
+    this match {
+      case Cons(h, t) => f(h(), t().foldRight2(z)(f))
+      case _ => z
+    }
   }
 
   def exist(p:(A=>Boolean)):Boolean={
@@ -31,7 +45,7 @@ sealed trait Stream[+A] {
   }
 
   def takeWhile(p: A => Boolean): Stream[A]={
-    foldRight(Stream.empty()[A])((a,b)=> if(p(a)) Stream.cons(a,b) else Stream.empty()[A])
+    foldRight(Empty:Stream[A])((a,b)=> if(p(a)) Stream.cons(a,b) else Empty:Stream[A])
   }
 
   def headOption():Option[A]={
@@ -43,13 +57,13 @@ sealed trait Stream[+A] {
   }
 
   def filter(p:A=>Boolean):Stream[A]={
-    foldRight(Stream.empty()[A])((a,b)=> if(p(a)) Stream.cons(a,b) else b)
+    foldRight2(Empty:Stream[A])((a,b)=> if(p(a)) Stream.cons(a,b) else b)
   }
   def append[B>:A](a: =>Stream[B]):Stream[B]={
     foldRight(a)((h,t) =>Stream.cons(h,t))
   }
   def flatMap[B](f: A => Stream[B]): Stream[B] ={
-    foldRight(Empty[B])((a,b)=>b.append(f(a)))
+    foldRight(Empty:Stream[B])((a,b)=>b.append(f(a)))
   }
 
 
@@ -94,7 +108,9 @@ object Stream{
     unfold((0,1))(n=>Some((n._1,(n._2,n._1+n._2))))
   }
 
+
+
   def main(args: Array[String]): Unit = {
-    println(Stream(1,3,4,2,5).takeWhile(_<4).toList)
+    println(Stream(1,5).map(_+4).filter(_<7).toList)
   }
 }

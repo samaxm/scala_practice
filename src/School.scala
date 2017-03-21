@@ -55,6 +55,7 @@ class School {
 object Command extends Enumeration{
   type Command=Value
   val ADD,DELETE,UPDATE,QUERY,LIST,EXIT=Value
+
 }
 
 object Week5{
